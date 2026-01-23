@@ -9,6 +9,8 @@ const fileInfo = document.getElementById('fileInfo');
 const fileNameSpan = document.getElementById('fileName');
 const sheetSelector = document.getElementById('sheetSelector');
 const sheetSelect = document.getElementById('sheetSelect');
+const processingTypeSelector = document.getElementById('processingTypeSelector');
+const processingTypeSelect = document.getElementById('processingTypeSelect');
 const generateBtn = document.getElementById('generateBtn');
 const preview = document.getElementById('preview');
 const previewContent = document.getElementById('previewContent');
@@ -87,6 +89,7 @@ function handleFile(file) {
             });
 
             sheetSelector.classList.add('show');
+            processingTypeSelector.classList.add('show');
             showStatus('文件加载成功！请选择Sheet表单。', 'success');
         } catch (error) {
             showStatus('文件解析失败：' + error.message, 'error');
@@ -99,7 +102,8 @@ function handleFile(file) {
 function parseInsertSQL(sql) {
     // Match INSERT [IGNORE] INTO table_name (col1, col2, ...) VALUES (val1, val2, ...)
     // Support backticks around table and column names
-    const pattern = /INSERT\s+(?:IGNORE\s+)?INTO\s+(`?\w+`?)\s*\(([^)]+)\)\s*VALUES\s*\(([^)]+)\)/i;
+    // Support database.table format
+    const pattern = /INSERT\s+(?:IGNORE\s+)?INTO\s+(`?[\w.]+`?)\s*\(([^)]+)\)\s*VALUES\s*\(([^)]+)\)/i;
     const match = sql.match(pattern);
 
     if (!match) {
@@ -197,6 +201,7 @@ function generateSQL() {
         }
 
         // Generate SQL statements
+        const processingType = processingTypeSelect.value;
         const sqlStatements = [];
         for (let i = 3; i < jsonData.length; i++) {
             const row = jsonData[i];
@@ -229,7 +234,16 @@ function generateSQL() {
 
             // Construct SQL statement with IGNORE if present in original
             const insertClause = parsedSQL.isIgnore ? 'INSERT IGNORE INTO' : 'INSERT INTO';
-            const sql = `${insertClause} ${parsedSQL.tableName} (${parsedSQL.columns.join(', ')}) VALUES (${values.join(', ')});`;
+            let sql = `${insertClause} ${parsedSQL.tableName} (${parsedSQL.columns.join(', ')}) VALUES (${values.join(', ')})`;
+
+            // Add ON DUPLICATE KEY UPDATE if selected
+            if (processingType === 'onDuplicateKeyUpdate') {
+                sql += ' AS new_values';
+                const updateClauses = parsedSQL.columns.map(col => `${col} = new_values.${col}`);
+                sql += ` ON DUPLICATE KEY UPDATE ${updateClauses.join(', ')}`;
+            }
+
+            sql += ';';
             sqlStatements.push(sql);
         }
 

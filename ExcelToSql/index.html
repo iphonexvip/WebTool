@@ -220,6 +220,14 @@
             </select>
         </div>
 
+        <div class="sheet-selector" id="processingTypeSelector">
+            <label for="processingTypeSelect">选择处理类型：</label>
+            <select id="processingTypeSelect">
+                <option value="none">无处理</option>
+                <option value="onDuplicateKeyUpdate">重复数据处理 (添加 ON DUPLICATE KEY UPDATE)</option>
+            </select>
+        </div>
+
         <button class="btn" id="generateBtn">生成SQL文件</button>
 
         <div class="preview" id="preview">
