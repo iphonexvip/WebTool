@@ -97,8 +97,9 @@ function handleFile(file) {
 
 // Parse INSERT SQL to extract table name and columns
 function parseInsertSQL(sql) {
-    // Match INSERT INTO table_name (col1, col2, ...) VALUES (val1, val2, ...)
-    const pattern = /INSERT\s+INTO\s+(\S+)\s*\(([^)]+)\)\s*VALUES\s*\(([^)]+)\)/i;
+    // Match INSERT [IGNORE] INTO table_name (col1, col2, ...) VALUES (val1, val2, ...)
+    // Support backticks around table and column names
+    const pattern = /INSERT\s+(?:IGNORE\s+)?INTO\s+(`?\w+`?)\s*\(([^)]+)\)\s*VALUES\s*\(([^)]+)\)/i;
     const match = sql.match(pattern);
 
     if (!match) {
@@ -106,10 +107,13 @@ function parseInsertSQL(sql) {
     }
 
     const tableName = match[1].trim();
-    const columns = match[2].split(',').map(col => col.trim());
+    const isIgnore = /INSERT\s+IGNORE\s+INTO/i.test(sql);
+
+    // Parse columns and remove backticks
+    const columns = match[2].split(',').map(col => col.trim().replace(/`/g, ''));
     const values = match[3].split(',').map(val => val.trim());
 
-    return { tableName, columns, values };
+    return { tableName, columns, values, isIgnore };
 }
 
 // Generate SQL
@@ -223,8 +227,9 @@ function generateSQL() {
                 }
             });
 
-            // Construct SQL statement
-            const sql = `INSERT INTO ${parsedSQL.tableName} (${parsedSQL.columns.join(', ')}) VALUES (${values.join(', ')});`;
+            // Construct SQL statement with IGNORE if present in original
+            const insertClause = parsedSQL.isIgnore ? 'INSERT IGNORE INTO' : 'INSERT INTO';
+            const sql = `${insertClause} ${parsedSQL.tableName} (${parsedSQL.columns.join(', ')}) VALUES (${values.join(', ')});`;
             sqlStatements.push(sql);
         }
 
