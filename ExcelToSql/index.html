@@ -23,7 +23,7 @@
         }
 
         .container {
-            background: white;
+            background: #b0b0b8;
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             padding: 40px;
@@ -32,13 +32,13 @@
         }
 
         h1 {
-            color: #333;
+            color: #1d1d1f;
             margin-bottom: 10px;
             text-align: center;
         }
 
         .subtitle {
-            color: #666;
+            color: #6e6e73;
             text-align: center;
             margin-bottom: 30px;
             font-size: 14px;
@@ -56,11 +56,11 @@
 
         .upload-area:hover {
             border-color: #764ba2;
-            background: #f8f9ff;
+            background: #e8e8ed;
         }
 
         .upload-area.dragover {
-            background: #f0f0ff;
+            background: #e0e0e5;
             border-color: #764ba2;
         }
 
@@ -74,7 +74,7 @@
         }
 
         .file-info {
-            background: #f8f9ff;
+            background: #e8e8ed;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
@@ -97,17 +97,18 @@
         label {
             display: block;
             margin-bottom: 8px;
-            color: #333;
+            color: #1d1d1f;
             font-weight: 600;
         }
 
         select {
             width: 100%;
             padding: 12px;
-            border: 2px solid #ddd;
+            border: 2px solid #d2d2d7;
             border-radius: 8px;
             font-size: 14px;
             transition: border-color 0.3s;
+            background: #ffffff;
         }
 
         select:focus {
@@ -157,12 +158,12 @@
         }
 
         .preview h3 {
-            color: #333;
+            color: #1d1d1f;
             margin-bottom: 10px;
         }
 
         .preview-content {
-            background: #f8f9ff;
+            background: #e8e8ed;
             padding: 15px;
             border-radius: 8px;
             max-height: 300px;
@@ -171,6 +172,7 @@
             font-size: 12px;
             white-space: pre-wrap;
             word-break: break-all;
+            color: #1d1d1f;
         }
 
         .status {
@@ -231,10 +233,10 @@
         <div class="sheet-selector" id="parameterReplacementSection">
             <label for="parameterName">外部参数替换（可选）：</label>
             <div style="margin-bottom: 10px;">
-                <input type="text" id="parameterName" placeholder="参数名（如：user_id）" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px; margin-bottom: 10px;">
-                <textarea id="parameterValue" placeholder="参数值（每行一个）&#10;例如：&#10;123&#10;456&#10;789" rows="5" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px; resize: vertical; font-family: 'Courier New', monospace;"></textarea>
+                <input type="text" id="parameterName" placeholder="参数名（如：user_id）" style="width: 100%; padding: 12px; border: 2px solid #d2d2d7; border-radius: 8px; font-size: 14px; margin-bottom: 10px; background: #ffffff;">
+                <textarea id="parameterValue" placeholder="参数值（每行一个）&#10;例如：&#10;123&#10;456&#10;789" rows="5" style="width: 100%; padding: 12px; border: 2px solid #d2d2d7; border-radius: 8px; font-size: 14px; resize: vertical; font-family: 'Courier New', monospace; background: #ffffff;"></textarea>
             </div>
-            <p style="color: #666; font-size: 12px; margin-top: 5px;">每行输入一个参数值，将循环使用这些值替换指定字段</p>
+            <p style="color: #6e6e73; font-size: 12px; margin-top: 5px;">每行输入一个参数值，将循环使用这些值替换指定字段</p>
         </div>
 
         <button class="btn" id="generateBtn">生成SQL文件</button>
