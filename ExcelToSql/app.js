@@ -11,6 +11,8 @@ const sheetSelector = document.getElementById('sheetSelector');
 const sheetSelect = document.getElementById('sheetSelect');
 const processingTypeSelector = document.getElementById('processingTypeSelector');
 const processingTypeSelect = document.getElementById('processingTypeSelect');
+const parameterName = document.getElementById('parameterName');
+const parameterValue = document.getElementById('parameterValue');
 const generateBtn = document.getElementById('generateBtn');
 const preview = document.getElementById('preview');
 const previewContent = document.getElementById('previewContent');
@@ -90,6 +92,7 @@ function handleFile(file) {
 
             sheetSelector.classList.add('show');
             processingTypeSelector.classList.add('show');
+            document.getElementById('parameterReplacementSection').classList.add('show');
             showStatus('文件加载成功！请选择Sheet表单。', 'success');
         } catch (error) {
             showStatus('文件解析失败：' + error.message, 'error');
@@ -175,15 +178,33 @@ function generateSQL() {
             }
         });
 
+        // Get external parameter replacement settings
+        const paramName = parameterName.value.trim();
+        const paramValueInput = parameterValue.value.trim();
+
+        // Parse parameter values as array (split by comma)
+        const paramValues = paramValueInput ? paramValueInput.split(',').map(v => v.trim()).filter(v => v) : [];
+
         // Match SQL columns with Excel headers
         const columnMapping = [];
         for (let i = 0; i < parsedSQL.columns.length; i++) {
             const sqlColumn = parsedSQL.columns[i];
             const sqlValue = parsedSQL.values[i];
 
+            // Check if this column should use external parameter
+            let useExternalParam = false;
+            if (paramName && paramValues.length > 0 && sqlColumn === paramName) {
+                useExternalParam = true;
+            }
+
             // Try exact match first
             if (headerMap.hasOwnProperty(sqlColumn)) {
-                columnMapping.push({ sqlColumn, excelIndex: headerMap[sqlColumn], originalValue: sqlValue });
+                columnMapping.push({
+                    sqlColumn,
+                    excelIndex: headerMap[sqlColumn],
+                    originalValue: sqlValue,
+                    useExternalParam: useExternalParam
+                });
             } else {
                 // Try case-insensitive match
                 const lowerSqlColumn = sqlColumn.toLowerCase();
@@ -192,16 +213,27 @@ function generateSQL() {
                 );
 
                 if (matchedHeader) {
-                    columnMapping.push({ sqlColumn, excelIndex: headerMap[matchedHeader], originalValue: sqlValue });
+                    columnMapping.push({
+                        sqlColumn,
+                        excelIndex: headerMap[matchedHeader],
+                        originalValue: sqlValue,
+                        useExternalParam: useExternalParam
+                    });
                 } else {
                     // Field not found in headers, keep original value
-                    columnMapping.push({ sqlColumn, excelIndex: null, originalValue: sqlValue });
+                    columnMapping.push({
+                        sqlColumn,
+                        excelIndex: null,
+                        originalValue: sqlValue,
+                        useExternalParam: useExternalParam
+                    });
                 }
             }
         }
 
         // Generate SQL statements
         const processingType = processingTypeSelect.value;
+
         const sqlStatements = [];
         for (let i = 3; i < jsonData.length; i++) {
             const row = jsonData[i];
@@ -213,6 +245,18 @@ function generateSQL() {
 
             // Build VALUES clause
             const values = columnMapping.map(mapping => {
+                // If this column should use external parameter value
+                if (mapping.useExternalParam && paramValue) {
+                    // Check if paramValue is a number
+                    if (!isNaN(paramValue) && paramValue !== '') {
+                        return paramValue;
+                    } else {
+                        // Escape single quotes in strings
+                        const escapedValue = paramValue.replace(/'/g, "''");
+                        return `'${escapedValue}'`;
+                    }
+                }
+
                 // If field not found in headers, use original value from SQL example
                 if (mapping.excelIndex === null) {
                     return mapping.originalValue;

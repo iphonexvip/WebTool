@@ -43,7 +43,8 @@ Excel文件必须按以下格式组织：
 
 ```
 第1行: INSERT INTO users (id, name, email) VALUES (1, '示例', 'example@test.com');
-第2行: id | name | email
+第2行: id | 昵称 | 邮箱
+第3行: id | name | email
 第3行: 1 | 张三 | zhangsan@example.com
 第4行: 2 | 李四 | lisi@example.com
 ```
