@@ -235,60 +235,114 @@ function generateSQL() {
         const processingType = processingTypeSelect.value;
 
         const sqlStatements = [];
-        for (let i = 3; i < jsonData.length; i++) {
-            const row = jsonData[i];
 
-            // Skip empty rows
-            if (!row || row.every(cell => !cell && cell !== 0)) {
-                continue;
+        // If we have parameter values, loop through each parameter value
+        // For each parameter value, loop through all data rows
+        if (paramValues.length > 0) {
+            for (let paramIdx = 0; paramIdx < paramValues.length; paramIdx++) {
+                const currentParamValue = paramValues[paramIdx];
+
+                for (let i = 3; i < jsonData.length; i++) {
+                    const row = jsonData[i];
+
+                    // Skip empty rows
+                    if (!row || row.every(cell => !cell && cell !== 0)) {
+                        continue;
+                    }
+
+                    // Build VALUES clause
+                    const values = columnMapping.map(mapping => {
+                        // If this column should use external parameter value
+                        if (mapping.useExternalParam) {
+                            // Check if paramValue is a number
+                            if (!isNaN(currentParamValue) && currentParamValue !== '') {
+                                return currentParamValue;
+                            } else {
+                                // Escape single quotes in strings
+                                const escapedValue = currentParamValue.replace(/'/g, "''");
+                                return `'${escapedValue}'`;
+                            }
+                        }
+
+                        // If field not found in headers, use original value from SQL example
+                        if (mapping.excelIndex === null) {
+                            return mapping.originalValue;
+                        }
+
+                        let value = row[mapping.excelIndex];
+
+                        // Handle different data types
+                        if (value === null || value === undefined || value === '') {
+                            return 'NULL';
+                        } else if (typeof value === 'number') {
+                            return value.toString();
+                        } else {
+                            // Escape single quotes in strings
+                            value = value.toString().replace(/'/g, "''");
+                            return `'${value}'`;
+                        }
+                    });
+
+                    // Construct SQL statement with IGNORE if present in original
+                    const insertClause = parsedSQL.isIgnore ? 'INSERT IGNORE INTO' : 'INSERT INTO';
+                    let sql = `${insertClause} ${parsedSQL.tableName} (${parsedSQL.columns.join(', ')}) VALUES (${values.join(', ')})`;
+
+                    // Add ON DUPLICATE KEY UPDATE if selected
+                    if (processingType === 'onDuplicateKeyUpdate') {
+                        sql += ' AS new_values';
+                        const updateClauses = parsedSQL.columns.map(col => `${col} = new_values.${col}`);
+                        sql += ` ON DUPLICATE KEY UPDATE ${updateClauses.join(', ')}`;
+                    }
+
+                    sql += ';';
+                    sqlStatements.push(sql);
+                }
             }
+        } else {
+            // No parameter values, process normally
+            for (let i = 3; i < jsonData.length; i++) {
+                const row = jsonData[i];
 
-            // Build VALUES clause
-            const values = columnMapping.map(mapping => {
-                // If this column should use external parameter value
-                if (mapping.useExternalParam && paramValue) {
-                    // Check if paramValue is a number
-                    if (!isNaN(paramValue) && paramValue !== '') {
-                        return paramValue;
+                // Skip empty rows
+                if (!row || row.every(cell => !cell && cell !== 0)) {
+                    continue;
+                }
+
+                // Build VALUES clause
+                const values = columnMapping.map(mapping => {
+                    // If field not found in headers, use original value from SQL example
+                    if (mapping.excelIndex === null) {
+                        return mapping.originalValue;
+                    }
+
+                    let value = row[mapping.excelIndex];
+
+                    // Handle different data types
+                    if (value === null || value === undefined || value === '') {
+                        return 'NULL';
+                    } else if (typeof value === 'number') {
+                        return value.toString();
                     } else {
                         // Escape single quotes in strings
-                        const escapedValue = paramValue.replace(/'/g, "''");
-                        return `'${escapedValue}'`;
+                        value = value.toString().replace(/'/g, "''");
+                        return `'${value}'`;
                     }
+                });
+
+                // Construct SQL statement with IGNORE if present in original
+                const insertClause = parsedSQL.isIgnore ? 'INSERT IGNORE INTO' : 'INSERT INTO';
+                let sql = `${insertClause} ${parsedSQL.tableName} (${parsedSQL.columns.join(', ')}) VALUES (${values.join(', ')})`;
+
+                // Add ON DUPLICATE KEY UPDATE if selected
+                if (processingType === 'onDuplicateKeyUpdate') {
+                    sql += ' AS new_values';
+                    const updateClauses = parsedSQL.columns.map(col => `${col} = new_values.${col}`);
+                    sql += ` ON DUPLICATE KEY UPDATE ${updateClauses.join(', ')}`;
                 }
 
-                // If field not found in headers, use original value from SQL example
-                if (mapping.excelIndex === null) {
-                    return mapping.originalValue;
-                }
-
-                let value = row[mapping.excelIndex];
-
-                // Handle different data types
-                if (value === null || value === undefined || value === '') {
-                    return 'NULL';
-                } else if (typeof value === 'number') {
-                    return value.toString();
-                } else {
-                    // Escape single quotes in strings
-                    value = value.toString().replace(/'/g, "''");
-                    return `'${value}'`;
-                }
-            });
-
-            // Construct SQL statement with IGNORE if present in original
-            const insertClause = parsedSQL.isIgnore ? 'INSERT IGNORE INTO' : 'INSERT INTO';
-            let sql = `${insertClause} ${parsedSQL.tableName} (${parsedSQL.columns.join(', ')}) VALUES (${values.join(', ')})`;
-
-            // Add ON DUPLICATE KEY UPDATE if selected
-            if (processingType === 'onDuplicateKeyUpdate') {
-                sql += ' AS new_values';
-                const updateClauses = parsedSQL.columns.map(col => `${col} = new_values.${col}`);
-                sql += ` ON DUPLICATE KEY UPDATE ${updateClauses.join(', ')}`;
+                sql += ';';
+                sqlStatements.push(sql);
             }
-
-            sql += ';';
-            sqlStatements.push(sql);
         }
 
         if (sqlStatements.length === 0) {
