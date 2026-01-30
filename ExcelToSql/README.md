@@ -26,13 +26,14 @@ Excel文件必须按以下格式组织：
 | 行号 | 内容 | 示例 |
 |------|------|------|
 | 第1行 | INSERT SQL示例 | `INSERT INTO users (id, name, email) VALUES (1, '张三', 'test@example.com');` |
-| 第2行 | 表头（字段名） | `id` \| `name` \| `email` |
-| 第3行及以后 | 数据行 | `1` \| `张三` \| `zhangsan@example.com` |
+| 第2行 | 表头描述 | `id` \| `name` \| `email` |
+| 第3行 | 表头（字段名） | `id` \| `name` \| `email` |
+| 第4行及以后 | 数据行 | `1` \| `张三` \| `zhangsan@example.com` |
 
 ### 工作原理
 
 1. 程序会自动解析第一行的INSERT SQL语句，提取表名和字段列表
-2. 根据SQL中的字段名，自动匹配第二行表头中的对应列
+2. 根据SQL中的字段名，自动匹配第三行表头中的对应列
 3. 将每行数据按照字段顺序填充到SQL语句中
 4. 支持大小写不敏感的字段匹配
 
