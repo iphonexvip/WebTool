@@ -183,7 +183,7 @@ function generateSQL() {
 
             // Try exact match first
             if (headerMap.hasOwnProperty(sqlColumn)) {
-                columnMapping.push({ sqlColumn, excelIndex: headerMap[sqlColumn], originalValue: null });
+                columnMapping.push({ sqlColumn, excelIndex: headerMap[sqlColumn], originalValue: sqlValue });
             } else {
                 // Try case-insensitive match
                 const lowerSqlColumn = sqlColumn.toLowerCase();
@@ -192,7 +192,7 @@ function generateSQL() {
                 );
 
                 if (matchedHeader) {
-                    columnMapping.push({ sqlColumn, excelIndex: headerMap[matchedHeader], originalValue: null });
+                    columnMapping.push({ sqlColumn, excelIndex: headerMap[matchedHeader], originalValue: sqlValue });
                 } else {
                     // Field not found in headers, keep original value
                     columnMapping.push({ sqlColumn, excelIndex: null, originalValue: sqlValue });
