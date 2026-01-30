@@ -182,8 +182,8 @@ function generateSQL() {
         const paramName = parameterName.value.trim();
         const paramValueInput = parameterValue.value.trim();
 
-        // Parse parameter values as array (split by comma)
-        const paramValues = paramValueInput ? paramValueInput.split(',').map(v => v.trim()).filter(v => v) : [];
+        // Parse parameter values as array (split by newline)
+        const paramValues = paramValueInput ? paramValueInput.split('\n').map(v => v.trim()).filter(v => v) : [];
 
         // Match SQL columns with Excel headers
         const columnMapping = [];

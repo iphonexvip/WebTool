@@ -230,11 +230,11 @@
 
         <div class="sheet-selector" id="parameterReplacementSection">
             <label for="parameterName">外部参数替换（可选）：</label>
-            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                <input type="text" id="parameterName" placeholder="参数名（如：user_id）" style="flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px;">
-                <input type="text" id="parameterValue" placeholder="参数值数组（如：123,456,789）" style="flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px;">
+            <div style="margin-bottom: 10px;">
+                <input type="text" id="parameterName" placeholder="参数名（如：user_id）" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px; margin-bottom: 10px;">
+                <textarea id="parameterValue" placeholder="参数值（每行一个）&#10;例如：&#10;123&#10;456&#10;789" rows="5" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px; resize: vertical; font-family: 'Courier New', monospace;"></textarea>
             </div>
-            <p style="color: #666; font-size: 12px; margin-top: 5px;">参数值用逗号分隔，将循环使用这些值替换指定字段</p>
+            <p style="color: #666; font-size: 12px; margin-top: 5px;">每行输入一个参数值，将循环使用这些值替换指定字段</p>
         </div>
 
         <button class="btn" id="generateBtn">生成SQL文件</button>
